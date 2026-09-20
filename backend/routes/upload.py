@@ -75,6 +75,7 @@ async def upload_pdf(
             documents = [documents]
 
         page_contents = []
+
         for document in documents:
             if isinstance(document, tuple):
                 page_content = document[0]
@@ -82,9 +83,13 @@ async def upload_pdf(
                 page_content = document.page_content
 
             if page_content:
-                page_contents.append(page_content.strip())
+                page_contents.append(
+                    page_content.strip()
+                )
 
-        extracted_text = "\n\n".join(page_contents).strip()
+        extracted_text = "\n\n".join(
+            page_contents
+        ).strip()
 
         if not extracted_text:
             raise ValueError(
@@ -149,6 +154,7 @@ async def upload_pdf(
             retrieved_count=len(
                 retrieved_examples
             ),
+            retrieved_examples=retrieved_examples,
         )
 
     except HTTPException:

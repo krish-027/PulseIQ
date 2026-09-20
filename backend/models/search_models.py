@@ -21,9 +21,18 @@ class SearchResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     feedback_id: str
+    filename: str
     category: str
     split: str
     feedback: str
+    similarity: float = Field(
+        ge=-1.0,
+        le=1.0,
+        description=(
+            "Cosine similarity derived from the normalized FAISS "
+            "squared-L2 distance. Higher is more similar."
+        ),
+    )
     score: float
 
 

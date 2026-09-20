@@ -264,9 +264,11 @@ def test_search_endpoint_exposes_retrieval():
 
     for result in data["results"]:
         assert "feedback_id" in result
+        assert "filename" in result
         assert "category" in result
         assert "split" in result
         assert "feedback" in result
+        assert "similarity" in result
         assert "score" in result
 
         assert isinstance(
@@ -278,6 +280,8 @@ def test_search_endpoint_exposes_retrieval():
             result["score"],
             (int, float),
         )
+
+        assert -1.0 <= result["similarity"] <= 1.0
 
 
 def test_evaluation_api_exposes_saved_rag_report():

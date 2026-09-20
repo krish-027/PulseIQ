@@ -14,6 +14,15 @@ router = APIRouter(
 )
 
 
+def _cosine_similarity_from_squared_l2(distance: float) -> float:
+    """Convert normalized-vector squared L2 distance to cosine similarity."""
+
+    # The embedding service normalizes every vector before FAISS indexes it.
+    # For normalized vectors: squared_l2 = 2 - (2 * cosine_similarity).
+    similarity = 1.0 - (float(distance) / 2.0)
+    return max(-1.0, min(1.0, similarity))
+
+
 @router.get("/status")
 def search_status():
     return {
@@ -46,9 +55,11 @@ def search_feedback(
             results.append(
                 SearchResult(
                     feedback_id=metadata["feedback_id"],
+                    filename=metadata["filename"],
                     category=metadata["category"],
                     split=metadata["split"],
                     feedback=document.page_content.strip(),
+                    similarity=_cosine_similarity_from_squared_l2(score),
                     score=float(score),
                 )
             )

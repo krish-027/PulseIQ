@@ -20,6 +20,7 @@ class FakeRetrieverService:
                     ),
                     metadata={
                         "feedback_id": "FB-TEST001",
+                        "filename": "feedback_001.pdf",
                         "category": "Need Improvements",
                         "split": "reference",
                     },
@@ -34,6 +35,7 @@ class FakeRetrieverService:
                     ),
                     metadata={
                         "feedback_id": "FB-TEST002",
+                        "filename": "feedback_002.pdf",
                         "category": "Good",
                         "split": "reference",
                     },
@@ -88,9 +90,11 @@ def test_search_feedback(monkeypatch):
     assert len(data["results"]) == 2
 
     assert data["results"][0]["feedback_id"] == "FB-TEST001"
+    assert data["results"][0]["filename"] == "feedback_001.pdf"
     assert data["results"][0]["category"] == "Need Improvements"
     assert data["results"][0]["split"] == "reference"
     assert data["results"][0]["score"] == 0.42
+    assert data["results"][0]["similarity"] == 0.79
 
     assert data["results"][1]["feedback_id"] == "FB-TEST002"
     assert data["results"][1]["category"] == "Good"

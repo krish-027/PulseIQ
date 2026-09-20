@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -18,4 +20,7 @@ class UploadResponse(BaseModel):
     flagged_keywords: list[str]
     retrieved_count: int = Field(
         ge=0,
+    )
+    retrieved_examples: list[dict[str, Any]] = Field(
+        default_factory=list,
     )
