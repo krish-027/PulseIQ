@@ -748,12 +748,17 @@ Useful checks:
 - keyword-oriented summaries
 
 
-![PulseIQ Dashboard - View 01 ](docs\Dashboard_01.png)
-![PulseIQ Dashboard - View 02 ](docs\Dashboard_02.png)
-![PulseIQ Dashboard - View 03 ](docs\Dashboard_03.png)
-![PulseIQ Dashboard - View 04 ](docs\Dashboard_04.png)
-![PulseIQ Dashboard - View 05 ](docs\Dashboard_05.png)
-![PulseIQ Dashboard - View 06 ](docs\Dashboard_06.png)
+![PulseIQ Dashboard - View 01](./docs/Dashboard_01.png)
+
+![PulseIQ Dashboard - View 02](./docs/Dashboard_02.png)
+
+![PulseIQ Dashboard - View 03](./docs/Dashboard_03.png)
+
+![PulseIQ Dashboard - View 04](./docs/Dashboard_04.png)
+
+![PulseIQ Dashboard - View 05](./docs/Dashboard_05.png)
+
+![PulseIQ Dashboard - View 06](./docs/Dashboard_06.png)
 
 
 ### 3. Analyze Feedback
@@ -781,10 +786,14 @@ Streamlit result view
 ```
 
 
-![PulseIQ Analyze Feedback - View 01](docs\Analyze_Feedback_01.png)
-![PulseIQ Analyze Feedback - View 02](docs\Analyze_Feedback_02.png)
-![PulseIQ Analyze Feedback - View 03](docs\Analyze_Feedback_03.png)
-![PulseIQ Analyze Feedback - View 04](docs\Analyze_Feedback_04.png)
+![PulseIQ Analyze Feedback - View 01](./docs/Analyze_Feedback_01.png)
+
+![PulseIQ Analyze Feedback - View 02](./docs/Analyze_Feedback_02.png)
+
+![PulseIQ Analyze Feedback - View 03](./docs/Analyze_Feedback_03.png)
+
+![PulseIQ Analyze Feedback - View 04](./docs/Analyze_Feedback_04.png)
+
 
 
 
@@ -807,9 +816,11 @@ feedback mentioning poor communication
 ```
 
 
-![PulseIQ Search & Evidence - View 01](docs\Search_&_Evidence_01.png)
-![PulseIQ Search & Evidence - View 02](docs\Search_&_Evidence_02.png)
-![PulseIQ Search & Evidence - View 03](docs\Search_&_Evidence_03.png)
+![PulseIQ Search & Evidence - View 01](./docs/Search_&_Evidence_01.png)
+
+![PulseIQ Search & Evidence - View 02](./docs/Search_&_Evidence_02.png)
+
+![PulseIQ Search & Evidence - View 03](./docs/Search_&_Evidence_03.png)
 
 
 ### 5. Evaluation
@@ -825,9 +836,11 @@ The Evaluation page loads the saved evaluation reports through FastAPI and prese
 - Detailed reports
 
 
-![PulseIQ Search & Evidence - View 01](docs\Evaluation-01.png)
-![PulseIQ Search & Evidence - View 02](docs\Evaluation-02.png)
-![PulseIQ Search & Evidence - View 03](docs\Evaluation-03.png)
+![PulseIQ Evaluation - View 01](./docs/Evaluation-01.png)
+
+![PulseIQ Evaluation - View 02](./docs/Evaluation-02.png)
+
+![PulseIQ Evaluation - View 03](./docs/Evaluation-03.png)
 
 
 ### 6. System Status
