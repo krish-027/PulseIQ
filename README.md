@@ -12,6 +12,8 @@
 
 PulseIQ is a full-stack AI application for turning unstructured customer feedback into structured, explainable, searchable, and measurable insights.
 
+The Analyze Feedback workflow supports both single-document analysis and multi-PDF batch analysis, while preserving independent per-document results and persistence.
+
 The system accepts customer-feedback PDFs or raw feedback text, extracts and sanitizes the content, retrieves semantically similar historical feedback from a FAISS knowledge base, and uses Gemini through a LangChain RAG pipeline to classify the feedback into four business categories:
 
 - **Excellent**
@@ -55,6 +57,9 @@ PulseIQ currently contains a working application architecture with:
 - MMR-based retrieval configuration
 - PostgreSQL persistence
 - PDF extraction with OCR fallback
+- Multi-PDF upload and batch analysis through the Streamlit Analyze Feedback workflow
+- Per-document classification, confidence, rationale, and persistence within a batch
+- Per-file error isolation so one failed PDF does not stop the remaining PDFs from being analyzed
 - Explicit removal of selected customer-identifying fields before embedding
 - Semantic search API and UI
 - PostgreSQL-backed analytics API and dashboard
@@ -74,12 +79,59 @@ The repository also contains a generated FAISS index under `backend/vector_store
 
 ### Feedback ingestion
 
-- Upload customer-feedback PDFs through the FastAPI backend.
+- Upload one or multiple customer-feedback PDFs through the Streamlit Analyze Feedback workflow.
+- Each selected PDF is processed independently through the existing FastAPI upload pipeline.
 - Extract text using PyMuPDF.
 - Automatically fall back to OCR for pages where native extraction is unusable.
 - Normalize common PDF extraction artifacts.
 - Remove explicit fields such as customer name, account number, and contact number before the content is embedded.
 - Generate stable feedback identifiers and extraction metadata.
+- Display batch-level analysis results while preserving detailed per-document analysis.
+- Isolate per-file failures so one problematic PDF does not prevent other selected PDFs from being processed.
+
+### Multi-PDF batch analysis
+
+PulseIQ supports selecting multiple customer-feedback PDFs from the Analyze Feedback page in a single user action.
+
+The current batch workflow processes the selected documents sequentially:
+
+```text
+Multiple PDFs selected
+        |
+        v
+For each PDF
+        |
+        v
+Existing /api/upload/pdf endpoint
+        |
+        v
+PDF extraction + cleaning
+        |
+        v
+RAG retrieval
+        |
+        v
+Gemini classification
+        |
+        v
+PostgreSQL persistence
+        |
+        v
+Individual result
+        |
+        +----> Next PDF
+```
+
+The Analyze Feedback page presents:
+
+- A batch analysis summary
+- Per-document classification and confidence
+- Feedback IDs for persisted records
+- Retrieved evidence counts
+- A detailed-analysis selector for individual documents
+- Per-file error reporting when a document fails
+
+The batch feature does not introduce a separate batch API endpoint. Each document continues to use the existing single-document `/api/upload/pdf` contract, which is invoked once for each selected PDF.
 
 ### RAG-based classification
 
@@ -163,7 +215,8 @@ The System Status page checks availability of:
 ```mermaid
 flowchart TD
     U[User] --> UI[Streamlit UI]
-    UI --> API[FastAPI Application API]
+    UI --> BATCH[One or More PDFs]
+    BATCH --> API[FastAPI Application API]
 
     API --> UP[PDF Upload / Text Analysis]
     UP --> DOC[PyMuPDF + OCR + Cleaning + PII Removal]
@@ -205,6 +258,24 @@ flowchart TD
 ---
 
 ## End-to-end request flow
+
+### Batch analysis orchestration
+
+When multiple PDFs are selected, the Streamlit frontend orchestrates the existing single-document workflow once per PDF.
+
+```text
+Selected PDFs
+     |
+     +----> PDF 1 ---> Existing analysis pipeline ---> Result 1
+     |
+     +----> PDF 2 ---> Existing analysis pipeline ---> Result 2
+     |
+     +----> PDF 3 ---> Existing analysis pipeline ---> Result 3
+     |
+     +----> PDF N ---> Existing analysis pipeline ---> Result N
+```
+
+Each document is independently extracted, classified, persisted, and returned to the frontend.
 
 ### Production analysis path
 
@@ -543,8 +614,10 @@ The FastAPI application exposes multiple service groups.
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/upload/pdf` | Upload and process a customer-feedback PDF |
+| `POST` | `/api/upload/pdf` | Upload and process one customer-feedback PDF |
 | `GET` | `/api/upload/status` | Check upload-service availability |
+
+> Multi-PDF upload is currently orchestrated by the Streamlit frontend. The backend continues to expose the existing single-document `/api/upload/pdf` contract, which is invoked once for each selected PDF.
 
 ### Semantic search
 
@@ -763,28 +836,56 @@ Useful checks:
 
 ### 3. Analyze Feedback
 
-Use either a PDF upload or supported text-analysis path to send feedback through the backend.
+The Analyze Feedback page supports selecting one or multiple customer-feedback PDFs.
 
-The application performs:
+For a single PDF, PulseIQ processes the document through the normal end-to-end analysis pipeline.
+
+For multiple PDFs, PulseIQ processes each selected document independently and presents the results together in a batch summary.
+
+The workflow is:
 
 ```text
-Upload / Input
-    ↓
+One or More PDFs
+       |
+       v
+Streamlit Multi-File Upload
+       |
+       v
+Sequential Per-File Processing
+       |
+       v
 PDF extraction (when applicable)
-    ↓
+       |
+       v
 Cleaning + PII removal
-    ↓
+       |
+       v
 RAG retrieval
-    ↓
+       |
+       v
 Gemini classification
-    ↓
+       |
+       v
 Structured response
-    ↓
-Persistence
-    ↓
-Streamlit result view
+       |
+       v
+PostgreSQL persistence
+       |
+       v
+Batch results + detailed per-file analysis
 ```
 
+For multi-PDF uploads, the page shows:
+
+- Number of successfully analyzed documents
+- Per-document category
+- Per-document confidence
+- Feedback ID
+- Retrieved evidence count
+- Failed documents, when applicable
+- A detailed-analysis selector for inspecting an individual result
+
+A failure in one PDF does not stop the remaining selected PDFs from being processed.
 
 ![PulseIQ Analyze Feedback - View 01](./docs/Analyze_Feedback_01.png)
 
@@ -860,7 +961,7 @@ A simplified response from the analysis workflow has the following conceptual sh
   "confidence": 1.0,
   "explanation": "The feedback contains multiple low ratings and a negative recommendation, indicating substantial dissatisfaction.",
   "flagged_keywords": [
-    "Overall satisfaction with employee behavior 1",
+    "Overall satisfaction with employee behavior",
     "Recommendation: No"
   ],
   "retrieved_feedback_ids": [
@@ -1088,6 +1189,7 @@ PulseIQ is currently **not**:
 - a complete adaptive/corrective RAG system
 - a production-grade generalized PII detection platform
 - a real-time streaming analytics platform
+- a cross-document batch reasoning system that produces one unified analysis across all uploaded PDFs
 - an automatic live evaluation runner that executes the full benchmark every time the UI opens
 
 These may be useful future directions, but they are not required to understand the current implementation.
@@ -1115,6 +1217,14 @@ The current vector-store workflow uses a local index. Rebuilding the index is a 
 ### Frontend/backend configuration
 
 The current Streamlit HTTP client uses a local FastAPI base URL by default. Cloud deployment therefore requires environment-specific configuration changes rather than assuming the local URL is valid in production.
+
+### Batch processing model
+
+Multi-PDF analysis currently processes documents sequentially through the existing single-document API workflow.
+
+This keeps the implementation simple and preserves the existing backend architecture, but processing large batches can take longer than a parallel job-processing architecture.
+
+The current feature also treats each PDF independently. It does not yet perform a single collective analysis across all uploaded documents.
 
 ### Evaluation reports are persisted artifacts
 
@@ -1175,10 +1285,16 @@ Open PulseIQ
 Dashboard
      |
      v
-Upload / Analyze feedback
+Upload one or multiple feedback PDFs
      |
      v
-View category + confidence + explanation
+Analyze selected documents
+     |
+     v
+View batch analysis summary
+     |
+     v
+Inspect category + confidence + explanation
      |
      v
 Open Search & Evidence
@@ -1252,6 +1368,8 @@ indicating substantial dissatisfaction.
 ```
 
 The exact text is generated dynamically from the supplied feedback and retrieved context.
+
+> In the Analyze Feedback UI, displayed flagged keywords are normalized to remove trailing numeric rating values when present. The underlying backend response may still contain the original extracted phrase.
 
 ---
 
@@ -1386,7 +1504,7 @@ This layout keeps each screenshot next to the explanation of the corresponding p
 | `frontend/app.py` | Streamlit application shell and navigation |
 | `frontend/services/api_client.py` | Frontend-to-FastAPI HTTP client |
 | `frontend/pages/dashboard.py` | Analytics dashboard |
-| `frontend/pages/analysis.py` | Feedback analysis UI |
+| `frontend/pages/analysis.py` | Feedback analysis UI, multi-PDF upload, batch result presentation |
 | `frontend/pages/search.py` | Semantic search UI |
 | `frontend/pages/evaluation.py` | Evaluation UI |
 | `frontend/pages/system_status.py` | Service health UI |
