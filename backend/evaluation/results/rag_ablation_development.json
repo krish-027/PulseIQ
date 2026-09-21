@@ -1,9 +1,9 @@
 {
-  "evaluation_timestamp": "2026-09-20T05:40:57",
+  "evaluation_timestamp": "2026-09-21T14:29:54",
   "evaluation_split": "development",
   "experiment": "RAG vs No-RAG Ablation",
-  "manifest_path": "C:\\Users\\User\\AppData\\Local\\Temp\\pytest-of-User\\pytest-58\\test_report_can_be_saved0\\dataset_manifest.csv",
-  "source_rag_report": "C:\\Users\\User\\AppData\\Local\\Temp\\pytest-of-User\\pytest-58\\test_report_can_be_saved0\\rag_evaluation_development_20260919_000000.json",
+  "manifest_path": "C:\\Users\\User\\AppData\\Local\\Temp\\pytest-of-User\\pytest-60\\test_report_can_be_saved0\\dataset_manifest.csv",
+  "source_rag_report": "C:\\Users\\User\\AppData\\Local\\Temp\\pytest-of-User\\pytest-60\\test_report_can_be_saved0\\rag_evaluation_development_20260919_000000.json",
   "total_evaluation_records": 2,
   "paired_evaluation_cases": 2,
   "no_rag_failed_cases": 0,
